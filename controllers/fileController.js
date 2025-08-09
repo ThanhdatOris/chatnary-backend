@@ -55,7 +55,9 @@ const uploadFile = async (req, res) => {
       size: req.file.size,
       mimetype: req.file.mimetype,
       path: req.file.path,
-      uploadTime: new Date().toISOString()
+      uploadTime: new Date().toISOString(),
+      userId: req.user.userId, // Thêm userId từ authentication
+      userEmail: req.user.email
     };
 
     // Lưu metadata vào MongoDB

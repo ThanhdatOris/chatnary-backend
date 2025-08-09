@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "node server.js", 
+    "dev": "node server.js",
     "test": "node test-connections.js",
     "meilisearch": "meilisearch.exe --master-key=\"chatnary_master_key_2025\" --db-path=\"./meili_data\"",
     "setup": "npm install && npm run test"
@@ -15,9 +15,11 @@
   "description": "",
   "dependencies": {
     "axios": "^1.11.0",
+    "bcryptjs": "^3.0.2",
     "cors": "^2.8.5",
     "dotenv": "^17.2.1",
     "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.2",
     "meilisearch": "^0.51.0",
     "mongodb": "^6.18.0",
     "multer": "^2.0.2"

@@ -4,10 +4,14 @@
   "main": "index.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "node server.js",
+    "dev": "nodemon server.js",
+    "dev:basic": "node server.js",
     "test": "node test-connections.js",
     "meilisearch": "meilisearch.exe --master-key=\"chatnary_master_key_2025\" --db-path=\"./meili_data\"",
-    "setup": "npm install && npm run test"
+    "setup": "npm install && npm run test",
+    "test:auth": "node test-auth.js",
+    "test:api": "node test-api.js",
+    "test:search": "node test-search.js"
   },
   "keywords": [],
   "author": "",
@@ -23,5 +27,8 @@
     "meilisearch": "^0.51.0",
     "mongodb": "^6.18.0",
     "multer": "^2.0.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
   }
 }

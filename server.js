@@ -47,10 +47,11 @@ app.get('/health', (req, res) => {
 
 app.get('/', (req, res) => {
   res.json({
-    message: 'Chatnary Backend API',
+    message: 'Chatnary Backend API with Hot Reload! 🔥',
     version: '1.0.0',
     docs: '/api/docs',
-    health: '/health'
+    health: '/health',
+    hotReload: true
   });
 });
 

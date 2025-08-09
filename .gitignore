@@ -1,2 +1,9 @@
 .env
 /node_modules
+
+# Meilisearch files
+meilisearch.exe
+meili_data/
+
+# Uploads
+uploads/

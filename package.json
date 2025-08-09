@@ -3,8 +3,11 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "node server.js"
+    "start": "node server.js",
+    "dev": "node server.js", 
+    "test": "node test-connections.js",
+    "meilisearch": "meilisearch.exe --master-key=\"chatnary_master_key_2025\" --db-path=\"./meili_data\"",
+    "setup": "npm install && npm run test"
   },
   "keywords": [],
   "author": "",

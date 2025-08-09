@@ -9,9 +9,22 @@ const meilisearchClient = new MeiliSearch({
 // Tạo index cho documents
 const initMeilisearch = async () => {
   try {
-    const index = await meilisearchClient.createIndex('documents', {
-      primaryKey: 'id'
-    });
+    // Thử lấy index trước, nếu không có thì tạo mới
+    let index;
+    try {
+      index = meilisearchClient.index('documents');
+      await index.getStats(); // Test xem index có tồn tại không
+      console.log('✅ Meilisearch index đã tồn tại, đang cập nhật cấu hình...');
+    } catch (getError) {
+      // Index chưa tồn tại, tạo mới
+      const createResult = await meilisearchClient.createIndex('documents', {
+        primaryKey: 'id'
+      });
+      // Đợi task hoàn thành
+      await meilisearchClient.waitForTask(createResult.taskUid);
+      index = meilisearchClient.index('documents');
+      console.log('✅ Meilisearch index mới đã được tạo');
+    }
     
     // Cấu hình searchable attributes
     await index.updateSearchableAttributes([
@@ -51,41 +64,10 @@ const initMeilisearch = async () => {
 
     console.log('✅ Meilisearch index đã được khởi tạo và cấu hình');
   } catch (error) {
-    if (error.code === 'index_already_exists') {
-      console.log('✅ Meilisearch index đã tồn tại, đang cập nhật cấu hình...');
-      
-      // Cập nhật cấu hình cho index đã tồn tại
-      try {
-        const index = meilisearchClient.index('documents');
-        
-        await index.updateSearchableAttributes([
-          'title',
-          'content',
-          'originalName'
-        ]);
-        
-        await index.updateFilterableAttributes([
-          'uploadTime',
-          'fileType',
-          'size'
-        ]);
-        
-        await index.updateSortableAttributes([
-          'uploadTime',
-          'size',
-          'title'
-        ]);
-        
-        console.log('✅ Cấu hình Meilisearch đã được cập nhật');
-      } catch (updateError) {
-        console.error('⚠️  Lỗi cập nhật cấu hình Meilisearch:', updateError.message);
-      }
-    } else {
-      console.error('⚠️  Lỗi khởi tạo Meilisearch:', error.message);
-      console.log('💡 Tip: Hãy cài đặt và khởi động Meilisearch server');
-      console.log('💡 Download: https://github.com/meilisearch/meilisearch/releases');
-      console.log('💡 Server sẽ chạy mà không có search (chức năng bị hạn chế)');
-    }
+    console.error('⚠️  Lỗi khởi tạo Meilisearch:', error.message);
+    console.log('💡 Tip: Hãy cài đặt và khởi động Meilisearch server');
+    console.log('💡 Download: https://github.com/meilisearch/meilisearch/releases');
+    console.log('💡 Server sẽ chạy mà không có search (chức năng bị hạn chế)');
   }
 };
 

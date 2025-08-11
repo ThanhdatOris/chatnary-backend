@@ -3,21 +3,42 @@ const path = require('path');
 const { getDB } = require('../config/mongodb');
 const { meilisearchClient } = require('../config/meilisearch');
 
-// Service để lưu metadata file vào MongoDB
+// Service để lưu metadata file vào MongoDB với user subcollection
 const saveFileMetadata = async (fileData) => {
   try {
     const db = getDB();
-    const collection = db.collection('files');
+    
+    // Create users collection if not exists
+    const usersCollection = db.collection('users');
+    
+    // Ensure user document exists
+    await usersCollection.updateOne(
+      { _id: fileData.userId },
+      { 
+        $setOnInsert: { 
+          _id: fileData.userId,
+          email: fileData.userEmail,
+          createdAt: new Date()
+        }
+      },
+      { upsert: true }
+    );
+    
+    // Use files as subcollection within the main files collection
+    // but with clear user ownership
+    const filesCollection = db.collection('files');
     
     const metadata = {
       ...fileData,
       id: fileData.filename, // Dùng filename làm unique ID
       uploadTime: new Date(),
-      indexed: false // Đánh dấu chưa được index
+      indexed: false, // Đánh dấu chưa được index
+      userId: fileData.userId, // Ensure userId is always present
+      userEmail: fileData.userEmail
     };
     
-    const result = await collection.insertOne(metadata);
-    console.log('File metadata đã được lưu:', result.insertedId);
+    const result = await filesCollection.insertOne(metadata);
+    console.log('File metadata đã được lưu với user subcollection structure:', result.insertedId);
     
     return metadata;
   } catch (error) {

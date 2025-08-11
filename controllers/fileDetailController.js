@@ -7,11 +7,15 @@ const fs = require('fs');
 const getFileDetail = async (req, res) => {
   try {
     const { fileId } = req.params;
+    const userId = req.user.userId; // Get current user
     
-    // Lấy thông tin từ MongoDB
+    // Lấy thông tin từ MongoDB - chỉ file của user hiện tại
     const db = getDB();
     const collection = db.collection('files');
-    const fileMetadata = await collection.findOne({ id: fileId });
+    const fileMetadata = await collection.findOne({ 
+      id: fileId,
+      userId: userId // Ensure user can only access their own files
+    });
     
     if (!fileMetadata) {
       return res.status(404).json({
@@ -53,11 +57,15 @@ const getFileDetail = async (req, res) => {
 const downloadFile = async (req, res) => {
   try {
     const { fileId } = req.params;
+    const userId = req.user.userId; // Get current user
     
-    // Lấy thông tin file từ MongoDB
+    // Lấy thông tin file từ MongoDB - chỉ file của user hiện tại
     const db = getDB();
     const collection = db.collection('files');
-    const fileMetadata = await collection.findOne({ id: fileId });
+    const fileMetadata = await collection.findOne({ 
+      id: fileId,
+      userId: userId // Ensure user can only download their own files
+    });
     
     if (!fileMetadata) {
       return res.status(404).json({
@@ -101,16 +109,20 @@ const downloadFile = async (req, res) => {
 const deleteFile = async (req, res) => {
   try {
     const { fileId } = req.params;
+    const userId = req.user.userId; // Get current user
     
-    // Lấy thông tin file từ MongoDB
+    // Lấy thông tin file từ MongoDB - chỉ file của user hiện tại
     const db = getDB();
     const collection = db.collection('files');
-    const fileMetadata = await collection.findOne({ id: fileId });
+    const fileMetadata = await collection.findOne({ 
+      id: fileId,
+      userId: userId // Ensure user can only delete their own files
+    });
     
     if (!fileMetadata) {
       return res.status(404).json({
         success: false,
-        message: 'Không tìm thấy file'
+        message: 'Không tìm thấy file hoặc bạn không có quyền xóa file này'
       });
     }
     
@@ -121,7 +133,10 @@ const deleteFile = async (req, res) => {
     }
     
     // Xóa từ MongoDB
-    await collection.deleteOne({ id: fileId });
+    await collection.deleteOne({ 
+      id: fileId,
+      userId: userId // Double check user ownership
+    });
     
     // Xóa từ Meilisearch
     try {
@@ -158,11 +173,17 @@ const listFiles = async (req, res) => {
       indexed = ''
     } = req.query;
     
+    // Get current user from authentication middleware
+    const userId = req.user.userId;
+    
     const db = getDB();
     const collection = db.collection('files');
     
-    // Xây dựng query filter
-    const filter = {};
+    // Xây dựng query filter - chỉ lấy files của user hiện tại
+    const filter = {
+      userId: userId // Filter by current user only
+    };
+    
     if (fileType) {
       filter.mimetype = { $regex: fileType, $options: 'i' };
     }

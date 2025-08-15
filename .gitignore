@@ -1,9 +1,57 @@
+# Environment files
 .env
-/node_modules
+.env.local
+.env.*.local
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+pip-log.txt
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.log
+.pytest_cache/
+
+# Legacy Node.js (cleaned)
+node_modules/
+package*.json
+*.js
+config/
+controllers/
+middleware/
+routes/
+services/
 
 # Meilisearch files
 meilisearch.exe
 meili_data/
 
-# Uploads
+# Uploads and data
 uploads/
+vector_stores/
+logs/
+dumps/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+.dockerignore

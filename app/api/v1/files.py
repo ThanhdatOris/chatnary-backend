@@ -66,11 +66,22 @@ async def upload_file(
         # Save metadata to database
         saved_metadata = await file_service.save_file_metadata(file_metadata_data)
         
-        # TODO: Index file content in background (will be implemented in search service)
+        # Process document for AI chat in background
+        try:
+            from app.ai.rag_engine import rag_engine
+            await rag_engine.process_file_for_chat(
+                file_path, 
+                current_user.id, 
+                str(saved_metadata.id)
+            )
+            processing_status = "success"
+        except Exception as e:
+            processing_status = "failed"
+            print(f"Error processing document: {e}")
         
         return FileUploadResponse(
             success=True,
-            message="File đã được upload thành công",
+            message=f"File đã được upload thành công. Xử lý AI: {processing_status}",
             file=saved_metadata
         )
         

@@ -24,6 +24,11 @@ class UserUpdateRequest(BaseModel):
     """User profile update request model"""
     fullName: Optional[str] = Field(None, min_length=1, max_length=100)
 
+class PasswordChangeRequest(BaseModel):
+    """Password change request model"""
+    currentPassword: str = Field(..., min_length=1)
+    newPassword: str = Field(..., min_length=6, max_length=100)
+
 class User(UserBase):
     """User response model (without password)"""
     id: str

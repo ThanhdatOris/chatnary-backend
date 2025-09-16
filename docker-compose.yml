@@ -5,6 +5,8 @@ services:
     build: .
     ports:
       - "8000:8000"
+    env_file:
+      - .env
     environment:
       # Database
       - MONGODB_URI=${MONGODB_URI}
@@ -29,21 +31,7 @@ services:
       - ./vector_stores:/app/vector_stores
       - ./logs:/app/logs
     depends_on:
-      - mongodb
       - meilisearch
-    restart: unless-stopped
-    networks:
-      - chatnary-network
-
-  # MongoDB Database
-  mongodb:
-    image: mongo:7
-    environment:
-      - MONGO_INITDB_DATABASE=chatnary
-    volumes:
-      - mongodb_data:/data/db
-    ports:
-      - "27017:27017"
     restart: unless-stopped
     networks:
       - chatnary-network
@@ -64,7 +52,6 @@ services:
       - chatnary-network
 
 volumes:
-  mongodb_data:
   meilisearch_data:
 
 networks:

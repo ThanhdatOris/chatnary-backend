@@ -1,7 +1,4 @@
 #!/usr/bin/env python3
-"""
-Setup script for Chatnary Python Backend
-"""
 
 import os
 import sys

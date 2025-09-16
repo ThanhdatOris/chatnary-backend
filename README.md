@@ -16,6 +16,7 @@ Backend API mới cho ứng dụng Chatnary - File management, search và AI cha
 ## 🚀 Khởi động nhanh
 
 ### Option 1: Docker Compose (Khuyến nghị)
+
 ```bash
 # Chạy setup và khởi động
 python setup.py
@@ -26,6 +27,7 @@ start.bat
 ```
 
 ### Option 2: Local Development
+
 ```bash
 # Setup environment
 python setup.py
@@ -93,12 +95,14 @@ start.bat                        # Interactive startup
 ## 🌐 API Endpoints
 
 ### 🔐 Authentication
+
 - `POST /api/auth/register` - User registration
 - `POST /api/auth/login` - User login  
 - `GET /api/auth/profile` - Get user profile
 - `PUT /api/auth/profile` - Update profile
 
 ### 📁 File Management
+
 - `POST /api/upload` - Upload files (PDF, DOCX, TXT, MD)
 - `GET /api/files` - List user files with pagination
 - `GET /api/files/{file_id}` - Get file details
@@ -106,17 +110,20 @@ start.bat                        # Interactive startup
 - `DELETE /api/files/{file_id}` - Delete file
 
 ### 🔍 Search & Discovery
+
 - `GET /api/search` - Search files with filters
 - `GET /api/suggestions` - Search suggestions
 - `GET /api/stats` - File statistics
 
 ### 🤖 AI Chat (NEW!)
+
 - `POST /api/chat` - Chat with documents (RAG)
 - `GET /api/chat/history` - Conversation history
 - `GET /api/chat/models` - Available AI models
 - `POST /api/process-document/{file_id}` - Process file for AI
 
 ### 🔍 System
+
 - `GET /health` - Health check
 - `GET /` - API information
 - `GET /docs` - Interactive API documentation
@@ -124,6 +131,7 @@ start.bat                        # Interactive startup
 ## ⚙️ Cấu hình
 
 ### Environment Variables (.env)
+
 ```bash
 # Application
 DEBUG=False
@@ -153,16 +161,19 @@ MAX_CONCURRENT_REQUESTS=10
 ## 🤖 AI Features
 
 ### RAG (Retrieval Augmented Generation)
+
 - **Multi-document support** - Chat với nhiều tài liệu cùng lúc
 - **Source citations** - Trích dẫn chính xác từ tài liệu gốc
 - **Vector similarity search** - Tìm kiếm ngữ nghĩa thông minh
 - **User context isolation** - Mỗi user có vector store riêng
 
 ### Supported AI Models
+
 - **Google Gemini** (Miễn phí với quota) - Recommended
 - **OpenAI GPT** (Có phí) - High quality
 
 ### Document Processing
+
 - **Supported formats:** PDF, DOCX, DOC, TXT, MD
 - **Intelligent chunking** - Chia văn bản tối ưu cho RAG
 - **Metadata enhancement** - Thêm thông tin ngữ cảnh
@@ -171,12 +182,14 @@ MAX_CONCURRENT_REQUESTS=10
 ## 📊 Performance & Monitoring
 
 ### Metrics
+
 - **Response time:** 1.8-6 seconds (30% cải thiện)
 - **Memory usage:** 0.8-2GB (35% giảm)
 - **Concurrent users:** 100+ supported
 - **File processing:** 5-15 seconds per document
 
 ### Health Checks
+
 ```bash
 curl http://localhost:8000/health
 curl http://localhost:8000/api/chat/models
@@ -185,6 +198,7 @@ curl http://localhost:8000/api/chat/models
 ## 🐳 Docker Deployment
 
 ### Production Ready
+
 ```yaml
 # docker-compose.yml includes:
 - chatnary-backend (Python FastAPI)
@@ -196,6 +210,7 @@ curl http://localhost:8000/api/chat/models
 ```
 
 ### Scaling
+
 ```bash
 # Scale backend instances
 docker-compose up -d --scale chatnary-backend=3
@@ -204,18 +219,21 @@ docker-compose up -d --scale chatnary-backend=3
 ## 🔗 Tech Stack
 
 ### Core
+
 - **FastAPI** - Modern async Python web framework
 - **Pydantic** - Data validation và serialization
 - **Motor** - Async MongoDB driver
 - **Meilisearch** - Full-text search engine
 
 ### AI & ML
+
 - **LangChain** - RAG framework
 - **FAISS** - Vector similarity search  
 - **HuggingFace** - Embeddings model
 - **OpenAI/Google** - LLM APIs
 
 ### Infrastructure
+
 - **Docker** - Containerization
 - **Uvicorn** - ASGI server
 - **Python 3.11** - Runtime
@@ -234,6 +252,7 @@ docker-compose up -d --scale chatnary-backend=3
 ## 🔄 Migration từ Node.js
 
 Hệ thống mới **tương thích 100%** với frontend hiện tại:
+
 - ✅ Same API endpoints
 - ✅ Same JWT format  
 - ✅ Same response structure

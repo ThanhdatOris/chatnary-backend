@@ -230,6 +230,84 @@ async def delete_file(
             detail="Lỗi server khi xóa file"
         )
 
+@router.get("/files/{file_id}/content")
+async def get_file_content(
+    file_id: str,
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Get extracted text content of a file
+    """
+    try:
+        file_metadata = await file_service.get_file_by_id(file_id, current_user.id)
+        
+        if not file_metadata:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="File không tồn tại"
+            )
+        
+        # Check if file is processed
+        if not (file_metadata.indexed if hasattr(file_metadata, 'indexed') else False):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="File chưa được xử lý. Vui lòng đợi quá trình xử lý hoàn tất."
+            )
+        
+        # Extract text content from file
+        file_path = file_service.get_file_path(file_metadata.filename)
+        
+        if not os.path.exists(file_path):
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="File vật lý không tồn tại"
+            )
+        
+        # Extract text based on file type
+        text_content = ""
+        if file_metadata.mimetype == "application/pdf":
+            try:
+                from langchain_community.document_loaders import PyPDFLoader
+                loader = PyPDFLoader(file_path)
+                documents = loader.load()
+                text_content = "\n\n".join([doc.page_content for doc in documents])
+            except Exception as e:
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail="Không thể trích xuất nội dung từ file PDF"
+                )
+        elif file_metadata.mimetype in ["text/plain", "text/markdown"]:
+            try:
+                async with aiofiles.open(file_path, 'r', encoding='utf-8') as f:
+                    text_content = await f.read()
+            except Exception as e:
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail="Không thể đọc nội dung file text"
+                )
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Loại file không hỗ trợ xem nội dung"
+            )
+        
+        return {
+            "success": True,
+            "content": text_content,
+            "filename": file_metadata.originalName,
+            "mimetype": file_metadata.mimetype,
+            "size": len(text_content),
+            "pages": text_content.count('\n\n') + 1 if text_content else 0
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Lỗi server khi lấy nội dung file"
+        )
+
 @router.get("/stats", response_model=FileStatsResponse)
 async def get_file_stats(
     current_user: Optional[User] = Depends(get_current_user_optional)

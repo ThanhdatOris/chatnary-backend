@@ -11,6 +11,7 @@ from app.models.user import (
     User, LoginResponse, UserResponse, StandardResponse
 )
 from app.core.security import security
+from app.config.settings import settings
 from app.core.auth import get_current_user
 from app.config.database import get_collection
 from app.services.email_service import email_service
@@ -206,6 +207,82 @@ async def login(login_data: UserLoginRequest):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Lỗi server khi đăng nhập"
         )
+
+@router.get("/verify", response_model=UserResponse)
+async def verify(current_user: User = Depends(get_current_user)):
+    """
+    Verify current token and return user info
+    """
+    return UserResponse(
+        success=True,
+        message="Xác thực token thành công",
+        user=current_user
+    )
+
+@router.post("/dev-login", response_model=LoginResponse)
+async def dev_login():
+    """
+    Development-only login that issues a token for a preconfigured user.
+    Enabled only when settings.BYPASS_AUTH_FOR_DEV is True.
+    """
+    if not settings.BYPASS_AUTH_FOR_DEV:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Dev login is disabled")
+
+    try:
+        users_collection = get_collection("users")
+
+        # Find or create the dev user
+        email = settings.DEV_BYPASS_USER_EMAIL.lower()
+        user = await users_collection.find_one({"email": email})
+
+        if not user:
+            hashed_password = security.get_password_hash("dev-login-placeholder")
+            new_user = {
+                "email": email,
+                "password": hashed_password,
+                "fullName": settings.DEV_BYPASS_USER_NAME,
+                "createdAt": datetime.utcnow(),
+                "isActive": True,
+                "role": settings.DEV_BYPASS_USER_ROLE,
+                "lastLogin": datetime.utcnow()
+            }
+            result = await users_collection.insert_one(new_user)
+            user_id = result.inserted_id
+            user = {**new_user, "_id": user_id}
+        else:
+            # Update lastLogin for existing dev user
+            await users_collection.update_one(
+                {"_id": user["_id"]},
+                {"$set": {"lastLogin": datetime.utcnow()}}
+            )
+
+        # Create JWT token
+        token = security.create_access_token(
+            data={
+                "userId": str(user["_id"]),
+                "email": user["email"],
+                "role": user.get("role", "user")
+            }
+        )
+
+        user_response = User(
+            id=str(user["_id"]),
+            email=user["email"],
+            fullName=user["fullName"],
+            role=user.get("role", "user"),
+            isActive=user.get("isActive", True),
+            createdAt=user["createdAt"],
+            lastLogin=user.get("lastLogin", datetime.utcnow())
+        )
+
+        return LoginResponse(
+            success=True,
+            message="Dev login thành công",
+            user=user_response,
+            token=token
+        )
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Lỗi server khi dev-login")
 
 @router.get("/profile", response_model=UserResponse)
 async def get_profile(current_user: User = Depends(get_current_user)):
